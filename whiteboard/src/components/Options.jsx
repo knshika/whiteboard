@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/options.css";
+import "../styles/Options.css";
 
 const Options = ({ lineWidth, setLineWidth, color, setColor, ctx }) => {
   return (

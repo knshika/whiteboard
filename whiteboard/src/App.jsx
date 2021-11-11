@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Options from "./components/Options";
+import ToolsBar from "./components/ToolsBar";
 
 function App() {
   const [cursorStyles, setCursorStyles] = useState({
@@ -15,6 +16,7 @@ function App() {
   const [lastY, setLastY] = useState(0);
   const [restoreArray, setRestoreArray] = useState([]);
   const [color, setColor] = useState("#000000");
+  const [tool, setTool] = useState("pen");
 
   useLayoutEffect(() => {
     const canvas = document.getElementById("canvas");
@@ -90,6 +92,7 @@ function App() {
         setColor={setColor}
         ctx={ctx}
       />
+      <ToolsBar tool={tool} setTool={setTool} />
     </div>
   );
 }

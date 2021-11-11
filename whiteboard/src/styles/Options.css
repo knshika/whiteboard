@@ -1,6 +1,6 @@
 .options {
   position: absolute;
-
+  box-shadow: 0px 0px 20px 0.1px rgba(0, 0, 0, 0.25);
   height: auto;
   padding: 10px;
   width: 100%;
@@ -16,6 +16,7 @@
   justify-content: center;
   margin: 0rem 1rem;
   align-items: center;
+  opacity: 0.8;
 }
 
 .options input {
@@ -27,8 +28,9 @@
   border: none;
   background-color: transparent;
   color: transparent;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
 }
 
 .options input[type="range"] {
