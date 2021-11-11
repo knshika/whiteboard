@@ -17,6 +17,7 @@ function App() {
   const [restoreArray, setRestoreArray] = useState([]);
   const [color, setColor] = useState("#000000");
   const [tool, setTool] = useState("pen");
+  const [redoArray, setRedoArray] = useState([]);
 
   useLayoutEffect(() => {
     const canvas = document.getElementById("canvas");
@@ -33,7 +34,15 @@ function App() {
 
   const handleMouseMove = (e) => {
     if (!drawing) return;
-    ctx.strokeStyle = color;
+    if (tool === "pen") {
+      ctx.strokeStyle = color;
+    } else if (tool === "eraser") {
+      ctx.strokeStyle = "#fff";
+    }
+    if (tool === "fill") {
+      return;
+    }
+
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(e.clientX, e.clientY);
@@ -42,6 +51,10 @@ function App() {
     setLastY(e.clientY);
   };
   const handleMouseDown = (e) => {
+    if (tool == "fill") {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     setDrawing(true);
     setLastX(e.clientX);
     setLastY(e.clientY);
@@ -58,11 +71,11 @@ function App() {
       className="App"
       //doubt
       onMouseMove={(e) => {
-        // const cursor=document.querySelector(".cursor");
+        const cursor = document.querySelector(".cursor");
         // cursor.style.top = e.clientY+"px";
         // cursor.style.left = e.clientX+"px";
-        // cursor.style.height = lineWidth+"px";
-        // cursor.style.width = lineWidth+"px";
+        cursor.style.height = lineWidth + "px";
+        cursor.style.width = lineWidth + "px";
         // cursor.style.border = "1px solid" + color;
         setCursorStyles({
           top: e.clientY,
@@ -73,9 +86,9 @@ function App() {
       <div
         className="cursor"
         style={{
-          border: `1px solid ${color}`,
-          height: lineWidth,
-          width: lineWidth,
+          border: tool === "pen" ? `1px solid ${color}` : "1px solid #000",
+          // height: lineWidth,
+          // width: lineWidth,
           ...cursorStyles,
         }}
       ></div>
@@ -92,7 +105,16 @@ function App() {
         setColor={setColor}
         ctx={ctx}
       />
-      <ToolsBar tool={tool} setTool={setTool} />
+      <ToolsBar
+        tool={tool}
+        setTool={setTool}
+        restoreArray={restoreArray}
+        setRestoreArray={setRestoreArray}
+        redoArray={redoArray}
+        setRedoArray={setRedoArray}
+        ctx={ctx}
+        canvas={canvas}
+      />
     </div>
   );
 }
