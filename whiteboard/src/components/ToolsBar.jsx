@@ -12,8 +12,6 @@ const ToolsBar = ({
   ctx,
   canvas,
 }) => {
-  const AddText = () => {};
-
   const undoTask = () => {
     let newArray = [...restoreArray];
     const popped = newArray.pop();
@@ -52,9 +50,7 @@ const ToolsBar = ({
         <div
           className={tool === Tool.name ? "tool selected" : "tool"}
           onClick={() => {
-            Tool.name === "text"
-              ? AddText()
-              : Tool.name === "undo"
+            Tool.name === "undo"
               ? undoTask()
               : Tool.name === "redo"
               ? redoTask()

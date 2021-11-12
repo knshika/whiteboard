@@ -2,6 +2,7 @@ import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Options from "./components/Options";
 import ToolsBar from "./components/ToolsBar";
+import AddTextCard from "./components/AddTextCard";
 
 function App() {
   const [cursorStyles, setCursorStyles] = useState({ top: 0, left: 0 });
@@ -33,14 +34,12 @@ function App() {
   const createLine = (x, y) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = color;
+    console.log("createLine" + restoreArray.length);
     restoreArray.forEach((element) => {
-      if (element) {
-        ctx.putImageData(element, 0, 0);
-      }
+      ctx.putImageData(element, 0, 0);
     });
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
-    // console.log(lastX, lastY, x, y);
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -92,38 +91,44 @@ function App() {
     });
   };
 
+  const drawStroke = (x, y, strokeColor) => {
+    ctx.strokeStyle = strokeColor;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    setLastX(x);
+    setLastY(y);
+  };
   //Function which takes care of mouse move with the current tool
   const handleMouseMove = (e) => {
     if (!drawing) return;
 
-    if (tool === "fill") return;
+    switch (tool) {
+      case "fill":
+        break;
+      case "line":
+        createLine(e.clientX, e.clientY);
+        break;
+      case "circle":
+        createCircle(e.clientX, e.clientY);
+        break;
+      case "rectangle":
+        createRectangle(e.clientX, e.clientY);
+        break;
+      case "move":
+        moveScreen(e.clientX, e.clientY);
+        break;
+      case "pen":
+        drawStroke(e.clientX, e.clientY, color);
+        break;
+      case "eraser":
+        drawStroke(e.clientX, e.clientY, "#fff");
+        break;
 
-    if (tool === "line") {
-      createLine(e.clientX, e.clientY);
-      return;
+      default:
+        break;
     }
-    if (tool === "circle") {
-      createCircle(e.clientX, e.clientY);
-      return;
-    }
-    if (tool === "rectangle") {
-      createRectangle(e.clientX, e.clientY);
-      return;
-    }
-    if (tool === "move") {
-      moveScreen(e.clientX, e.clientY);
-      return;
-    }
-
-    if (tool === "pen") ctx.strokeStyle = color;
-    else if (tool === "eraser") ctx.strokeStyle = "#fff";
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.clientX, e.clientY);
-    ctx.stroke();
-    setLastX(e.clientX);
-    setLastY(e.clientY);
   };
 
   //function which handles mouse when the mouse is pressed
@@ -132,6 +137,7 @@ function App() {
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+
     // if (tool === "rectangle") {
     //   setLastX(e.clientX);
     //   setLastY(e.clientY);
@@ -177,6 +183,17 @@ function App() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       ></canvas>
+      {tool === "text" ? (
+        <AddTextCard
+          ctx={ctx}
+          canvas={canvas}
+          restoreArray={restoreArray}
+          setRestoreArray={setRestoreArray}
+          setTool={setTool}
+        />
+      ) : (
+        ""
+      )}
       <Options
         lineWidth={lineWidth}
         setLineWidth={setLineWidth}
