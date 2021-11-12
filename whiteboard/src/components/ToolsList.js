@@ -18,9 +18,6 @@ const ToolsList = [
     name: "circle",
   },
   {
-    name: "spray",
-  },
-  {
     name: "fill",
   },
   {

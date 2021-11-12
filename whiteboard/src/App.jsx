@@ -4,10 +4,7 @@ import Options from "./components/Options";
 import ToolsBar from "./components/ToolsBar";
 
 function App() {
-  const [cursorStyles, setCursorStyles] = useState({
-    top: 0,
-    left: 0,
-  });
+  const [cursorStyles, setCursorStyles] = useState({ top: 0, left: 0 });
   const [canvas, setCanvas] = useState(null);
   const [ctx, setCtx] = useState(null);
   const [lineWidth, setLineWidth] = useState(5);
@@ -32,16 +29,94 @@ function App() {
     ctx.lineWidth = 5;
   }, []);
 
+  //function to create line
+  const createLine = (x, y) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = color;
+    restoreArray.forEach((element) => {
+      if (element) {
+        ctx.putImageData(element, 0, 0);
+      }
+    });
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    // console.log(lastX, lastY, x, y);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  //function to create rectangle
+  const createRectangle = (x, y) => {
+    const mouseX = parseInt(x - canvas.offsetLeft);
+    const mouseY = parseInt(y - canvas.offsetTop);
+    const width = mouseX - lastX;
+    const height = mouseY - lastY;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    restoreArray.forEach((element) => {
+      if (element) {
+        ctx.putImageData(element, 0, 0);
+      }
+    });
+    ctx.strokeStyle = color;
+    ctx.strokeRect(lastX, lastY, width, height);
+  };
+
+  //function to create circle
+  const createCircle = (x, y) => {
+    const mouseX = parseInt(x - canvas.offsetLeft);
+    const mouseY = parseInt(y - canvas.offsetTop);
+    const radius = Math.sqrt(
+      Math.pow(mouseX - lastX, 2) + Math.pow(mouseY - lastY, 2)
+    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    restoreArray.forEach((element) => {
+      if (element) {
+        ctx.putImageData(element, 0, 0);
+      }
+    });
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, radius, 2 * Math.PI, 0);
+    ctx.stroke();
+  };
+
+  //function to move screen with cursor
+  const moveScreen = (x, y) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const mouseX = parseInt(x - canvas.offsetLeft);
+    const mouseY = parseInt(y - canvas.offsetTop);
+    const width = mouseX - lastX;
+    const height = mouseY - lastY;
+    restoreArray.forEach((element) => {
+      if (element) ctx.putImageData(element, width, height);
+    });
+  };
+
+  //Function which takes care of mouse move with the current tool
   const handleMouseMove = (e) => {
     if (!drawing) return;
-    if (tool === "pen") {
-      ctx.strokeStyle = color;
-    } else if (tool === "eraser") {
-      ctx.strokeStyle = "#fff";
-    }
-    if (tool === "fill") {
+
+    if (tool === "fill") return;
+
+    if (tool === "line") {
+      createLine(e.clientX, e.clientY);
       return;
     }
+    if (tool === "circle") {
+      createCircle(e.clientX, e.clientY);
+      return;
+    }
+    if (tool === "rectangle") {
+      createRectangle(e.clientX, e.clientY);
+      return;
+    }
+    if (tool === "move") {
+      moveScreen(e.clientX, e.clientY);
+      return;
+    }
+
+    if (tool === "pen") ctx.strokeStyle = color;
+    else if (tool === "eraser") ctx.strokeStyle = "#fff";
 
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
@@ -50,16 +125,23 @@ function App() {
     setLastX(e.clientX);
     setLastY(e.clientY);
   };
+
+  //function which handles mouse when the mouse is pressed
   const handleMouseDown = (e) => {
-    if (tool == "fill") {
+    if (tool === "fill") {
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+    // if (tool === "rectangle") {
+    //   setLastX(e.clientX);
+    //   setLastY(e.clientY);
+    // }
     setDrawing(true);
     setLastX(e.clientX);
     setLastY(e.clientY);
   };
 
+  //function which handles mouse when the mouse is released
   const handleMouseUp = (e) => {
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setRestoreArray([...restoreArray, img]);
@@ -72,11 +154,8 @@ function App() {
       //doubt
       onMouseMove={(e) => {
         const cursor = document.querySelector(".cursor");
-        // cursor.style.top = e.clientY+"px";
-        // cursor.style.left = e.clientX+"px";
         cursor.style.height = lineWidth + "px";
         cursor.style.width = lineWidth + "px";
-        // cursor.style.border = "1px solid" + color;
         setCursorStyles({
           top: e.clientY,
           left: e.clientX,

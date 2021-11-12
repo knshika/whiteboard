@@ -42,7 +42,7 @@ const ToolsBar = ({
   };
 
   const resetPage = () => {
-    // setRestoreArray([]);
+    setRestoreArray([]);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
