@@ -1,7 +1,16 @@
 import React from "react";
+import { useDispatch } from "react-redux";
+import {
+  useCanvasState,
+  setLineWidth,
+  setColor,
+} from "../redux/reducers/canvasReducer";
 import "../styles/Options.css";
 
-const Options = ({ lineWidth, setLineWidth, color, setColor, ctx }) => {
+const Options = ({ ctx }) => {
+  const { lineWidth, color } = useCanvasState();
+  const dispatch = useDispatch();
+
   return (
     <div className="options">
       <div>
@@ -12,8 +21,9 @@ const Options = ({ lineWidth, setLineWidth, color, setColor, ctx }) => {
           id="lineWidth"
           value={lineWidth}
           onChange={(e) => {
-            setLineWidth(e.target.value);
-            ctx.lineWidth = lineWidth;
+            const _lineWidth = parseInt(e.target.value);
+            dispatch(setLineWidth(_lineWidth));
+            ctx.lineWidth = _lineWidth;
           }}
         />
       </div>
@@ -25,8 +35,9 @@ const Options = ({ lineWidth, setLineWidth, color, setColor, ctx }) => {
           id="color"
           value={color}
           onChange={(e) => {
-            setColor(e.target.value);
-            ctx.color = color;
+            const _color = e.target.value;
+            dispatch(setColor(_color));
+            ctx.color = _color;
           }}
         />
       </div>

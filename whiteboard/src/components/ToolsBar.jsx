@@ -1,23 +1,39 @@
 import React from "react";
-import ToolsList from "./ToolsList";
 import "../styles/ToolsBar.css";
-
-const ToolsBar = ({
-  tool,
-  setTool,
-  restoreArray,
-  setRestoreArray,
-  redoArray,
+import {
+  addToRedoArray,
   setRedoArray,
-  ctx,
-  canvas,
-}) => {
+  setRestoreArray,
+  useActionsState,
+} from "../redux/reducers/actionsReducer";
+import { useDispatch } from "react-redux";
+import { setTool, useCanvasState } from "../redux/reducers/canvasReducer";
+
+const ToolsList = [
+  "pen",
+  "move",
+  "eraser",
+  "line",
+  "rectangle",
+  "circle",
+  "fill",
+  "text",
+  "undo",
+  "redo",
+  "delete",
+];
+
+const ToolsBar = ({ ctx, canvas }) => {
+  const { restoreArray, redoArray } = useActionsState();
+  const { tool } = useCanvasState();
+  const dispatch = useDispatch();
+
   const undoTask = () => {
     let newArray = [...restoreArray];
     const popped = newArray.pop();
     if (!popped) return;
-    setRedoArray([...redoArray, popped]);
-    setRestoreArray(newArray);
+    dispatch(addToRedoArray(popped));
+    dispatch(setRestoreArray(newArray));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     newArray.forEach((data) => {
       if (data) {
@@ -27,10 +43,12 @@ const ToolsBar = ({
   };
 
   const redoTask = () => {
-    let popped = redoArray.pop();
+    let _redoArray = [...redoArray];
+    let popped = _redoArray.pop();
+    dispatch(setRedoArray(_redoArray));
     if (!popped) return;
     let newArray = [...restoreArray, popped];
-    setRestoreArray(newArray);
+    dispatch(setRestoreArray(newArray));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     newArray.forEach((data) => {
       if (data) {
@@ -40,28 +58,28 @@ const ToolsBar = ({
   };
 
   const resetPage = () => {
-    setRestoreArray([]);
+    dispatch(setRestoreArray([]));
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   return (
     <div className="tools">
-      {ToolsList.map((Tool) => (
+      {ToolsList.map((Tool, index) => (
         <div
-          className={tool === Tool.name ? "tool selected" : "tool"}
+          className={tool === Tool ? "tool selected" : "tool"}
           onClick={() => {
-            Tool.name === "undo"
+            Tool === "undo"
               ? undoTask()
-              : Tool.name === "redo"
+              : Tool === "redo"
               ? redoTask()
-              : Tool.name === "delete"
+              : Tool === "delete"
               ? resetPage()
-              : setTool(Tool.name);
+              : dispatch(setTool(Tool));
           }}
-          key={Tool.name}
+          key={index}
         >
-          <span className="tooltipLabel">{Tool.name}</span>
-          <img src={`/images/${Tool.name}.png`} />
+          <span className="tooltipLabel">{Tool}</span>
+          <img src={`/images/${Tool}.png`} />
         </div>
       ))}
     </div>

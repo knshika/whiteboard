@@ -3,19 +3,26 @@ import "./App.css";
 import Options from "./components/Options";
 import ToolsBar from "./components/ToolsBar";
 import AddTextCard from "./components/AddTextCard";
+import {
+  setColor,
+  setLastCursor,
+  useCanvasState,
+} from "./redux/reducers/canvasReducer";
+import { useDispatch } from "react-redux";
+import {
+  useActionsState,
+  setDrawing,
+  addToRestoreArray,
+} from "./redux/reducers/actionsReducer";
 
 function App() {
   const [cursorStyles, setCursorStyles] = useState({ top: 0, left: 0 });
   const [canvas, setCanvas] = useState(null);
   const [ctx, setCtx] = useState(null);
-  const [lineWidth, setLineWidth] = useState(5);
-  const [drawing, setDrawing] = useState(false);
-  const [lastX, setLastX] = useState(0);
-  const [lastY, setLastY] = useState(0);
-  const [restoreArray, setRestoreArray] = useState([]);
-  const [color, setColor] = useState("#000000");
-  const [tool, setTool] = useState("pen");
-  const [redoArray, setRedoArray] = useState([]);
+
+  const { tool, lineWidth, color, lastX, lastY } = useCanvasState();
+  const { drawing, restoreArray } = useActionsState();
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     const canvas = document.getElementById("canvas");
@@ -97,8 +104,7 @@ function App() {
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
-    setLastX(x);
-    setLastY(y);
+    dispatch(setLastCursor({ x, y }));
   };
   //Function which takes care of mouse move with the current tool
   const handleMouseMove = (e) => {
@@ -136,32 +142,23 @@ function App() {
     if (tool === "fill") {
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      dispatch(setColor("#000"));
     }
-
-    // if (tool === "rectangle") {
-    //   setLastX(e.clientX);
-    //   setLastY(e.clientY);
-    // }
-    setDrawing(true);
-    setLastX(e.clientX);
-    setLastY(e.clientY);
+    dispatch(setDrawing(true));
+    dispatch(setLastCursor({ x: e.clientX, y: e.clientY }));
   };
 
   //function which handles mouse when the mouse is released
   const handleMouseUp = (e) => {
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    setRestoreArray([...restoreArray, img]);
-    setDrawing(false);
+    dispatch(addToRestoreArray(img));
+    dispatch(setDrawing(false));
   };
 
   return (
     <div
       className="App"
-      //doubt
       onMouseMove={(e) => {
-        const cursor = document.querySelector(".cursor");
-        cursor.style.height = lineWidth + "px";
-        cursor.style.width = lineWidth + "px";
         setCursorStyles({
           top: e.clientY,
           left: e.clientX,
@@ -172,8 +169,8 @@ function App() {
         className="cursor"
         style={{
           border: tool === "pen" ? `1px solid ${color}` : "1px solid #000",
-          // height: lineWidth,
-          // width: lineWidth,
+          height: lineWidth,
+          width: lineWidth,
           ...cursorStyles,
         }}
       ></div>
@@ -183,34 +180,9 @@ function App() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       ></canvas>
-      {tool === "text" ? (
-        <AddTextCard
-          ctx={ctx}
-          canvas={canvas}
-          restoreArray={restoreArray}
-          setRestoreArray={setRestoreArray}
-          setTool={setTool}
-        />
-      ) : (
-        ""
-      )}
-      <Options
-        lineWidth={lineWidth}
-        setLineWidth={setLineWidth}
-        color={color}
-        setColor={setColor}
-        ctx={ctx}
-      />
-      <ToolsBar
-        tool={tool}
-        setTool={setTool}
-        restoreArray={restoreArray}
-        setRestoreArray={setRestoreArray}
-        redoArray={redoArray}
-        setRedoArray={setRedoArray}
-        ctx={ctx}
-        canvas={canvas}
-      />
+      {tool === "text" ? <AddTextCard ctx={ctx} canvas={canvas} /> : ""}
+      <Options ctx={ctx} />
+      <ToolsBar ctx={ctx} canvas={canvas} />
     </div>
   );
 }

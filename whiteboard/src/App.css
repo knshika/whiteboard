@@ -23,8 +23,8 @@ body {
   /* doubt */
   top: 100px;
   left: 100px;
-  height: 10px;
-  width: 10px;
+  /* height: 10px;
+  width: 10px; */
   pointer-events: none;
   border-radius: 100%;
   transform: translate(-50%, -50%);
